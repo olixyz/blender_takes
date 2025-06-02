@@ -1,5 +1,7 @@
 # Blender Takes
 
+![](./docs/img/bl_takes.png)
+
 A workflow for arbitrary variations (_takes_) from a single Blender file.
 
 ## What is this?
