@@ -1,0 +1,6 @@
+# No generated Takes ouput
+output/
+
+# No Quarto files
+*_files/
+*.html
