@@ -2,6 +2,50 @@
 from bpy import context
 
 
+# setup scene and viewlayer for take
+def setup_take(scenename="Scene", viewlayername="ViewLayer"):
+    # Catch if scenename and viewLayer do not exist
+    if not bpy.data.scenes.get(scenename):
+        raise Exception("Scene '{}' not in file".format(scenename))
+                
+    if not bpy.data.scenes[scenename].view_layers.get(viewlayername):
+        raise Exception("ViewLayer '{}' not in Scene".format(viewlayername))
+    
+    # Loop over all viewLayer and delete if not the one we specified
+    # vl = bpy.data.scenes[scenename].view_layers[viewlayername]
+    for vl in bpy.data.scenes[scenename].view_layers:
+        if vl.name != viewlayername:
+            bpy.data.scenes[scenename].view_layers.remove(vl)               
+            
+            
+    for s in bpy.data.scenes:
+        if s.name != scenename:
+            bpy.data.scenes.remove(s)
+          
+    # Create a new ViewLayer so we have clean ViewLayer settings
+    
+    
+    # if takename not in bpy.context.scene.view_layers:
+    bpy.context.scene.view_layers.new("take")
+    
+    # Delete the original viewLayer
+    vl = bpy.data.scenes[scenename].view_layers[viewlayername]
+    bpy.data.scenes[scenename].view_layers.remove(vl)  
+    
+    all_visible(scenename, "take")
+
+# Only used in setup_take
+def all_visible(scenename="Scene", viewlayername="ViewLayer"):
+    # Turn all objects on for rendering
+    for o in bpy.data.objects:
+        o.hide_viewport = False
+        o.hide_render = False
+        
+        # Handle object visibility in viewLayer    
+        vl_o = bpy.data.scenes[scenename].view_layers[viewlayername].objects.get(o.name)
+        vl_o.hide_set(0)
+
+
 def hide_all():
     print("UTILS::Hide all")
     coll = bpy.data.collections
@@ -35,6 +79,11 @@ def set_range(in_marker, out_marker):
     bpy.context.scene.frame_start = marker_in.frame
     bpy.context.scene.frame_end = marker_out.frame
 
+# Clear all material slots of objects in collection
+def clear_materials(coll):
+    for o in bpy.data.collections[coll].objects:
+        if o.type == "MESH":
+            o.data.materials.clear()
 
 def show_with_children(c_list):
     coll = bpy.data.collections
