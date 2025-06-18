@@ -2,6 +2,36 @@ import bpy
 import os
 import sys
 
+def warning_text():
+    
+    camera = bpy.context.scene.camera
+    empt = bpy.data.objects.new( "empty", None )
+    text = bpy.data.curves.new(type="FONT", name="take_warning")
+    text.body = "TAKE!"
+    text.align_x = "CENTER"
+    text.align_y = "CENTER"
+
+    text_obj = bpy.data.objects.new(name="Font Object", object_data=text)
+    text_obj.parent = empt
+    text_obj.hide_render = True
+    con = empt.constraints.new(type="COPY_TRANSFORMS")
+    con.target = camera
+
+    scale_fac = 1 # Should be scaled according to aspect ratio
+    text_obj.location.z = camera.data.lens * -0.028
+    text_obj.scale.xyz = (scale_fac,scale_fac,scale_fac)
+
+    collection_name = "take_warning"
+
+    layer_collection = bpy.context.view_layer.layer_collection
+
+    if not collection_name in bpy.data.collections:
+        new_collection = bpy.data.collections.new(collection_name)
+        layer_collection.collection.children.link(new_collection)
+
+    bpy.data.collections[collection_name].objects.link(text_obj)
+    bpy.data.collections[collection_name].objects.link(empt)
+
 argv = sys.argv
 takenames = argv[argv.index("--") + 1 :]  # get all args after "--"
 
@@ -32,6 +62,10 @@ for name in takenames:
     take_data_block = bpy.data.texts["takes"]
     take_data_block.clear()
     take_data_block.write("this is a renderfile")
+
+    # Setup warning text. This is so there is some indication
+    # to not accidentally do work in this file.
+    warning_text()
 
     # Save
     bpy.ops.wm.save_as_mainfile(copy=True, check_existing=False, filepath=output_file)
